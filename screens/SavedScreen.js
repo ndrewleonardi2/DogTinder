@@ -1,18 +1,30 @@
 import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-import { ExpoLinksView } from '@expo/samples';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import data from '../data.js';
 
-export default class LinksScreen extends React.Component {
+export default class SavedScreen extends React.Component {
   static navigationOptions = {
-    title: 'Links',
+    title: 'Saved',
   };
 
   render() {
     return (
       <ScrollView style={styles.container}>
-        {/* Go ahead and delete ExpoLinksView and replace it with your
-           * content, we just wanted to provide you with some helpful links */}
-        <ExpoLinksView />
+        {
+          data.map((pet) => {
+            return <View style={styles.card} key={pet.id}>
+              <Image
+                style={styles.image}
+                source={{ uri: pet.img }}
+              />
+              <View style={styles.description}>
+                <Text>{`Name: ${pet.name}, Age: ${pet.age}, Gender: ${pet.sex}`}</Text>
+                <Text>{pet.profile}</Text>
+              </View>
+
+            </View>
+          })
+        }
       </ScrollView>
     );
   }
@@ -23,5 +35,20 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 15,
     backgroundColor: '#fff',
+  },
+  card: {
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'black',
+    flex: 2,
+    flexDirection: 'row'
+  },
+  image: {
+    flex: 3,
+    justifyContent: 'center',
+    margin: 5
+  },
+  description: {
+    flex: 5
   },
 });
