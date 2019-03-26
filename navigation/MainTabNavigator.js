@@ -3,38 +3,38 @@ import { Platform } from 'react-native';
 import { createStackNavigator, createBottomTabNavigator } from 'react-navigation';
 
 import TabBarIcon from '../components/TabBarIcon';
-import HomeScreen from '../screens/HomeScreen';
-import LinksScreen from '../screens/LinksScreen';
+import SearchScreen from '../screens/SearchScreen';
+import SavedScreen from '../screens/SavedScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 
-const HomeStack = createStackNavigator({
-  Home: HomeScreen,
+const SearchStack = createStackNavigator({
+  Search: SearchScreen,
 });
 
-HomeStack.navigationOptions = {
-  tabBarLabel: 'Home',
+SearchStack.navigationOptions = {
+  tabBarLabel: 'Search',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
       name={
         Platform.OS === 'ios'
-          ? `ios-information-circle${focused ? '' : '-outline'}`
-          : 'md-information-circle'
+          ? `ios-search`
+          : 'md-search'
       }
     />
   ),
 };
 
-const LinksStack = createStackNavigator({
-  Links: LinksScreen,
+const SavedStack = createStackNavigator({
+  Saved: SavedScreen,
 });
 
-LinksStack.navigationOptions = {
-  tabBarLabel: 'Links',
+SavedStack.navigationOptions = {
+  tabBarLabel: 'Saved',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
-      name={Platform.OS === 'ios' ? 'ios-link' : 'md-link'}
+      name={Platform.OS === 'ios' ? 'ios-albums' : 'md-albums'}
     />
   ),
 };
@@ -48,13 +48,13 @@ SettingsStack.navigationOptions = {
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
-      name={Platform.OS === 'ios' ? 'ios-options' : 'md-options'}
+      name={Platform.OS === 'ios' ? 'ios-settings' : 'md-settings'}
     />
   ),
 };
 
 export default createBottomTabNavigator({
-  HomeStack,
-  LinksStack,
+  SearchStack,
+  SavedStack,
   SettingsStack,
 });
