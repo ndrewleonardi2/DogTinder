@@ -1,6 +1,5 @@
 import React from 'react';
 import { StyleSheet, Switch, Text, TextInput, View } from 'react-native';
-import Dimensions from 'Dimensions';
 import user from '../user';
 
 export default class SettingsScreen extends React.Component {
