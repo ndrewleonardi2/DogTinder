@@ -27,7 +27,7 @@ let user = (state = { data: {}, loading: true }, { type, payload }) => {
         ...state,
         data: {
           ageRange: {
-            max: Number(payload),
+            max: payload === '' ? '' : Number(payload),
             min: state.data.ageRange.min,
           },
           profile: state.data.profile,
@@ -41,7 +41,7 @@ let user = (state = { data: {}, loading: true }, { type, payload }) => {
         data: {
           ageRange: {
             max: state.data.ageRange.max,
-            min: Number(payload)
+            min: payload === '' ? '' : Number(payload)
           },
           profile: state.data.profile,
           id: state.data.id,
