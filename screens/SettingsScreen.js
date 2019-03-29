@@ -1,29 +1,27 @@
-import React from 'react';
-import { StyleSheet, Switch, Text, TextInput, View } from 'react-native';
-import user from '../user';
+import React, { Component } from 'react';
+import {
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  View
+} from 'react-native';
+import ACTION_CREATORS from '../redux/action_creators';
+import { connect } from 'react-redux';
 
-export default class SettingsScreen extends React.Component {
+class SettingsScreen extends Component {
   static navigationOptions = {
     title: 'Adopter Profile',
   };
   constructor(props) {
     super(props);
-    this.state = {
-      min: user.ageRange.min.toString(),
-      max: user.ageRange.max.toString(),
-      type: user.typePreference === 'dog'
-    };
-    this.toggle = this.toggle.bind(this);
-  }
-  toggle(type) {
-    this.setState({ type })
   }
   render() {
     return (
       <View
         style={styles.page}>
         <View style={styles.card}>
-          <Text>{user.profile}</Text>
+          <Text>{this.props.profile}</Text>
         </View>
         <View style={styles.card}>
           <Text style={styles.h1}>{`Preferences`}</Text>
@@ -34,8 +32,8 @@ export default class SettingsScreen extends React.Component {
                 <Text style={styles.typeGroupSide}>{`Cat`}</Text>
                 <Switch
                   style={styles.typeGroupSide}
-                  onValueChange={this.toggle}
-                  value={this.state.type}></Switch>
+                  onValueChange={this.props.update_type}
+                  value={this.props.type}></Switch>
                 <Text style={styles.typeGroupSide}>{`Dog`}</Text>
               </View>
             </View>
@@ -44,13 +42,13 @@ export default class SettingsScreen extends React.Component {
             <Text style={styles.typeGroupSide}>{`Age`}</Text>
             <TextInput
               style={styles.input}
-              onChangeText={(min) => this.setState({ min })}
-              value={this.state.min}
+              onChangeText={this.props.update_min}
+              value={this.props.min}
             />
             <TextInput
               style={styles.input}
-              onChangeText={(max) => this.setState({ max })}
-              value={this.state.max}
+              onChangeText={this.props.update_max}
+              value={this.props.max}
             />
           </View>
         </View>
@@ -86,3 +84,29 @@ const styles = StyleSheet.create({
     height: 50
   }
 });
+
+const mapStateToProps = (state) => {
+  console.log('@@@@@@@Mapping state to props', state);
+  return {
+    max: state.user.data.ageRange.max.toString(),
+    min: state.user.data.ageRange.min.toString(),
+    profile: state.user.data.profile,
+    type: state.user.data.typePreference === 'dog'
+  };
+}
+
+const mapActionsToProps = (dispatch) => ({
+  update_max(max) {
+    return dispatch(ACTION_CREATORS.update_max_age(max));
+  },
+  update_min(min) {
+    return dispatch(ACTION_CREATORS.update_min_age(min));
+  },
+  update_type(type) {
+    dispatch(ACTION_CREATORS.save_pet_preference_change());
+    dispatch(ACTION_CREATORS.update_type_preference(type));
+  }
+});
+
+
+export default connect(mapStateToProps, mapActionsToProps)(SettingsScreen);
