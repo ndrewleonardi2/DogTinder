@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import {
-  Image,
+  Button,
   ScrollView,
   StyleSheet,
-  Text,
-  View
+  Text
 } from 'react-native';
+import Modal from 'react-native-modal';
+import { Card, ListItem } from 'react-native-elements'
 import ACTION_CREATORS from '../redux/action_creators';
 import { connect } from 'react-redux';
 
@@ -13,24 +14,46 @@ class SavedScreen extends Component {
   static navigationOptions = {
     title: 'Saved',
   };
+  constructor(props) {
+    super(props);
+    this.state = {
+      target: {},
+      isModalVisible: false
+    }
+    this.toggleModal = this.toggleModal.bind(this);
+  }
+  toggleModal(target) {
+    this.setState({
+      isModalVisible: !this.state.isModalVisible,
+      target: target
+    });
+  }
   render() {
     return (
       <ScrollView style={styles.container}>
         {
           this.props.saved.map((pet) => {
-            return <View style={styles.card} key={pet.id}>
-              <Image
-                style={styles.image}
-                source={{ uri: pet.img }}
-              />
-              <View style={styles.description}>
-                <Text style={styles.title}>{`${pet.name}, ${pet.age} yr(s), ${pet.sex}`}</Text>
-                <Text>{pet.profile}</Text>
-              </View>
-            </View>
+            return (
+              <ListItem
+                key={pet.id}
+                leftAvatar={{ size: 'large', source: { uri: pet.img } }}
+                title={<Text style={styles.title}>{`${pet.name}, ${pet.age} yr(s), ${pet.sex}`}</Text>}
+                subtitle={pet.profile}
+                onPress={this.toggleModal.bind(this, pet)}>
+              </ListItem>
+            );
           })
         }
-      </ScrollView>
+        <Modal style={styles.modal} isVisible={this.state.isModalVisible}>
+          <Card containerStyle={{ flex: 1 }}
+            imageStyle={{ height: 400 }}
+            image={{ uri: this.state.target.img }}>
+            <Text style={styles.title}>{`${this.state.target.name}, ${this.state.target.age} yr(s), ${this.state.target.sex}`}</Text>
+            <Text>{this.state.target.profile}</Text>
+          </Card>
+          <Button onPress={this.toggleModal} title='Dismiss'></Button>
+        </Modal>
+      </ScrollView >
     );
   }
 }
@@ -41,20 +64,9 @@ const styles = StyleSheet.create({
     paddingTop: 15,
     backgroundColor: '#fff',
   },
-  card: {
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: 'black',
-    flex: 2,
-    flexDirection: 'row'
-  },
-  image: {
+  modal: {
     flex: 3,
-    justifyContent: 'center',
-    margin: 5
-  },
-  description: {
-    flex: 5
+    backgroundColor: '#fff',
   },
   title: {
     fontSize: 20,
