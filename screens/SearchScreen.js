@@ -4,6 +4,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import ENDPOINTS from '../constants/endpoints';
 import SwipeCards from 'react-native-swipe-cards';
 import { Card } from 'react-native-elements'
 import ACTION_CREATORS from '../redux/action_creators';
@@ -132,7 +133,7 @@ const mapStateToProps = (state) => {
 const mapActionsToProps = (dispatch) => ({
   fetch_pets() {
     dispatch(ACTION_CREATORS.get_pets());
-    return fetch("https://s3-us-west-2.amazonaws.com/cozi-interview-dev/pets.json")
+    return fetch(ENDPOINTS.PETS)
       .then(res => res.json())
       .then(data => {
         dispatch(ACTION_CREATORS.get_pets_success(data));
@@ -142,7 +143,7 @@ const mapActionsToProps = (dispatch) => ({
   },
   fetch_profile() {
     dispatch(ACTION_CREATORS.get_profile());
-    return fetch("https://s3-us-west-2.amazonaws.com/cozi-interview-dev/settings.json")
+    return fetch(ENDPOINTS.PROFIILE)
       .then(res => res.json())
       .then(data => {
         dispatch(ACTION_CREATORS.get_profile_success(data));
