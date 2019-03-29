@@ -1,81 +1,158 @@
-import React from 'react';
+import React, { Component } from 'react';
 import {
-  Image,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-import Swiper from 'react-native-deck-swiper';
-import data from '../data';
+import SwipeCards from 'react-native-swipe-cards';
+import { Card } from 'react-native-elements'
+import ACTION_CREATORS from '../redux/action_creators';
+import { connect } from 'react-redux';
 
-export default class HomeScreen extends React.Component {
+class HomeScreen extends Component {
   static navigationOptions = {
     title: 'Swipe right to save; left to ignore',
   };
-  render() {
+  constructor(props) {
+    super(props);
+    this.state = {
+      done: false,
+      type: props.type,
+      max: props.max,
+      min: props.min,
+    };
+  }
+  componentWillMount() {
+    this.props.fetch_profile()
+      .then(this.props.fetch_pets);
+  }
+  componentWillReceiveProps(props) {
+    if (!props.loading) {
+      let typeChanged = this.state.type !== props.type,
+        maxChanged = this.state.max !== props.max,
+        minChanged = this.state.min !== props.min;
+      if (typeChanged || maxChanged || minChanged) {
+        this.setState({
+          pets: props.pets,
+          max: props.max,
+          min: props.min,
+          type: props.type
+        });
+        if (this.state.done === true) {
+          this.setState({ done: false });
+        }
+      }
+    }
+  }
+  showCard(card) {
     return (
-      <View style={styles.container}>
-        <Swiper
-          cards={data}
-          renderCard={(card) => {
-            return (
-              <View style={styles.card}>
-                <View style={styles.group}>
-                  <Image
-                    style={styles.image}
-                    source={{ uri: card.img }}
-                  />
-                </View>
-                <View style={styles.group}>
-                  <Text style={styles.title}>{`${card.name}, ${card.age} yr(s), ${card.sex}`}</Text>
-                  <Text style={styles.description}>{card.profile}</Text>
-                </View>
-              </View>
-            )
-          }}
-          onSwiped={(index) => { console.log(index) }}
-          onSwipedAll={() => { console.log('onSwipedAll') }}
-          cardIndex={0}
-          backgroundColor={'#FFF'}
-          stackSize={1}>
-        </Swiper>
-      </View>
-    );
+      <Card containerStyle={{ flex: 1, borderWidth: 0 }}
+        imageStyle={{ height: 250 }}
+        image={{ uri: card.img }}>
+        <Text style={styles.title}>{`${card.name}, ${card.age} yr(s), ${card.sex}`}</Text>
+        <Text>{card.profile}</Text>
+      </Card>
+    )
+  }
+  removed(current) {
+    if (current === this.state.pets.length - 1) {
+      this.setState({ done: true });
+    }
+  }
+  render() {
+    if (this.props.loading) {
+      return (
+        <View style={styles.container}>
+          <Text>Loading...</Text>
+        </View>
+      );
+    } else if (this.state.done || this.state.pets.length === 0) {
+      let unavailable = 'Sorry, based on your preferences you have seen all the pets we have right now!',
+        done = 'That is it! Please check back later';
+      return (
+        <View style={styles.container}>
+          <Text style={styles.message}>
+            {this.state.done ? done : unavailable}
+          </Text>
+        </View>
+      );
+    } else {
+      return (
+        <View style={styles.container}>
+          <SwipeCards
+            cards={this.state.pets}
+            renderCard={this.showCard}
+            showNope={false}
+            showYup={false}
+            handleYup={(card) => { this.props.save(card) }}
+            cardRemoved={this.removed.bind(this)}>
+          </SwipeCards>
+        </View>
+      );
+    }
   }
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
   },
-  card: {
-    flex: 1
-  },
-  group: {
-    flex: 2
-  },
-  options: {
-    flex: 3,
-    flexDirection: 'row',
-    width: '100%',
-    height: 50,
-    position: 'absolute',
-    bottom: 0
-  },
-  option: {
-    flex: 3,
-    width: '100%',
-  },
-  image: {
-    flex: 2,
-    width: undefined,
-    height: undefined
+  message: {
+    fontSize: 30,
+    fontWeight: 'bold'
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold'
-  },
-  description: {
-    fontSize: 16
   }
 });
+
+const filterPets = (data, type, min, max) => {
+  return data
+    .filter((pet) => {
+      return pet.type === type && (min <= pet.age && pet.age <= max);
+    });
+}
+
+const mapStateToProps = (state) => {
+  let type = state.user.loading ? 'cat' : state.user.data.typePreference,
+    max = state.user.loading ? 0 : state.user.data.ageRange.max,
+    min = state.user.loading ? 0 : state.user.data.ageRange.min,
+    pets = filterPets(state.pets.data, type, min, max);
+
+  return {
+    loading: state.pets.loading || state.user.loading,
+    pets,
+    type,
+    max,
+    min
+  };
+}
+
+const mapActionsToProps = (dispatch) => ({
+  fetch_pets() {
+    dispatch(ACTION_CREATORS.get_pets());
+    return fetch("https://s3-us-west-2.amazonaws.com/cozi-interview-dev/pets.json")
+      .then(res => res.json())
+      .then(data => {
+        dispatch(ACTION_CREATORS.get_pets_success(data));
+        return data;
+      })
+      .catch(error => dispatch(ACTION_CREATORS.get_pets_failure(error)));
+  },
+  fetch_profile() {
+    dispatch(ACTION_CREATORS.get_profile());
+    return fetch("https://s3-us-west-2.amazonaws.com/cozi-interview-dev/settings.json")
+      .then(res => res.json())
+      .then(data => {
+        dispatch(ACTION_CREATORS.get_profile_success(data));
+        return data;
+      })
+      .catch(error => dispatch(ACTION_CREATORS.get_profile_failure(error)));
+  },
+  save(pet) {
+    return dispatch(ACTION_CREATORS.save_pet(pet));
+  },
+});
+
+export default connect(mapStateToProps, mapActionsToProps)(HomeScreen);
