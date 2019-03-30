@@ -85,8 +85,8 @@ const styles = StyleSheet.create({
   }
 });
 
+//Helper function to sync redux state with component props
 const mapStateToProps = (state) => {
-  console.log('@@@@@@@Mapping state to props', state);
   return {
     max: state.user.data.ageRange.max.toString(),
     min: state.user.data.ageRange.min.toString(),
@@ -95,6 +95,7 @@ const mapStateToProps = (state) => {
   };
 }
 
+//Helper function to map methods on props to dispatchable actions
 const mapActionsToProps = (dispatch) => ({
   update_max(max) {
     return dispatch(ACTION_CREATORS.update_max_age(max));
@@ -108,5 +109,5 @@ const mapActionsToProps = (dispatch) => ({
   }
 });
 
-
+//connect component to redux store
 export default connect(mapStateToProps, mapActionsToProps)(SettingsScreen);

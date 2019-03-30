@@ -74,17 +74,17 @@ const styles = StyleSheet.create({
   }
 });
 
+//Helper function to sync redux state with component props
 const mapStateToProps = (state) => {
-  console.log('Mapping state to props', state);
-  return {
-    saved: state.saved
-  };
+  return { saved: state.saved };
 }
 
+//Helper function to map methods on props to dispatchable actions
 const mapActionsToProps = (dispatch) => ({
   save(pet) {
     return dispatch(ACTION_CREATORS.save_pet(pet));
   }
 });
 
+//connect component to redux store
 export default connect(mapStateToProps, mapActionsToProps)(SavedScreen);

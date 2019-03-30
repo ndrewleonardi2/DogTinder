@@ -4,7 +4,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import ENDPOINTS from '../constants/endpoints';
 import SwipeCards from 'react-native-swipe-cards';
 import { Card } from 'react-native-elements'
 import ACTION_CREATORS from '../redux/action_creators';
@@ -24,14 +23,17 @@ class HomeScreen extends Component {
     };
   }
   componentWillMount() {
+    //fetch data from server to populate pet and profile in store
     this.props.fetch_profile()
       .then(this.props.fetch_pets);
   }
   componentWillReceiveProps(props) {
+    //Update component state base on stored preferences when modified
     if (!props.loading) {
       let typeChanged = this.state.type !== props.type,
         maxChanged = this.state.max !== props.max,
         minChanged = this.state.min !== props.min;
+
       if (typeChanged || maxChanged || minChanged) {
         this.setState({
           pets: props.pets,
@@ -39,6 +41,8 @@ class HomeScreen extends Component {
           min: props.min,
           type: props.type
         });
+
+        //Update component state when swippable cards are complete
         if (this.state.done === true) {
           this.setState({ done: false });
         }
@@ -56,6 +60,8 @@ class HomeScreen extends Component {
     )
   }
   removed(current) {
+
+    //Track current state of swipped cards and update component state accordingly
     if (current === this.state.pets.length - 1) {
       this.setState({ done: true });
     }
@@ -108,6 +114,7 @@ const styles = StyleSheet.create({
   }
 });
 
+//Helper method to filter pets based on user preferences
 const filterPets = (data, type, min, max) => {
   return data
     .filter((pet) => {
@@ -115,7 +122,9 @@ const filterPets = (data, type, min, max) => {
     });
 }
 
+//Helper function to sync redux state with component props
 const mapStateToProps = (state) => {
+  console.log('###', state)
   let type = state.user.loading ? 'cat' : state.user.data.typePreference,
     max = state.user.loading ? 0 : state.user.data.ageRange.max,
     min = state.user.loading ? 0 : state.user.data.ageRange.min,
@@ -130,12 +139,14 @@ const mapStateToProps = (state) => {
   };
 }
 
+//Helper function to map methods on props to dispatchable actions
 const mapActionsToProps = (dispatch) => ({
   fetch_pets() {
     dispatch(ACTION_CREATORS.get_pets());
-    return fetch(ENDPOINTS.PETS)
+    return fetch('https://s3-us-west-2.amazonaws.com/cozi-interview-dev/pets.json')
       .then(res => res.json())
       .then(data => {
+        console.log('pets', data)
         dispatch(ACTION_CREATORS.get_pets_success(data));
         return data;
       })
@@ -143,9 +154,10 @@ const mapActionsToProps = (dispatch) => ({
   },
   fetch_profile() {
     dispatch(ACTION_CREATORS.get_profile());
-    return fetch(ENDPOINTS.PROFIILE)
+    return fetch('https://s3-us-west-2.amazonaws.com/cozi-interview-dev/settings.json')
       .then(res => res.json())
       .then(data => {
+        console.log('profile', data)
         dispatch(ACTION_CREATORS.get_profile_success(data));
         return data;
       })
@@ -156,4 +168,5 @@ const mapActionsToProps = (dispatch) => ({
   },
 });
 
+//connect component to redux store
 export default connect(mapStateToProps, mapActionsToProps)(HomeScreen);
