@@ -8,4 +8,4 @@ To initialize project run the following commands from root directory
 $ npm start
 ```
 
-To modify the endpoints please edit the endpoint.js within the constants directory
+To modify the endpoints please edit the respective string literals on line 146 and 157 of SearchScreen.js within the screens directory
